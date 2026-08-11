@@ -1,0 +1,85 @@
+﻿Monthly summary 2026-08
+
+Metadata
+- Generated: 2026-08-11 15:37
+- Source: standup-2026-08.txt
+- Logged days: 4
+
+--------------------------------------------------
+
+AI PROMPT
+
+You are a senior engineering manager at a Swedish software company.
+
+Summarize the developer's month based on the standup logs below.
+
+Write the entire response in Swedish.
+
+Return the following sections:
+
+1. Executive summary for a manager (5 to 7 sentences)
+2. Salary review version focusing on ownership, initiative, impact, and deliveries
+3. Key deliveries
+4. Recurring work areas
+5. Blockers and risks
+6. Suggested goals for next month
+7. A short bullet list suitable for a development review
+
+Use a professional but natural Swedish tone.
+
+--------------------------------------------------
+
+Standup logs
+
+========================================
+2026-08-08
+
+What I did:
+Jobbaasdasd
+
+Plan tomorrow:
+Jobba	asd
+asdasd
+Blockers:
+Nejasdasd
+
+========================================
+2026-08-09
+
+What I did:
+Jobba123123
+
+Plan tomorrow:
+Jobba	123123
+
+Blockers:
+Nej123123
+
+
+========================================
+2026-08-10
+
+What I did:
+Jobba
+
+Plan tomorrow:
+Jobba	
+
+Blockers:
+Nej
+
+
+
+========================================
+2026-08-11
+
+What I did:
+- Jobbat med bolagsverket, testat skarpt byggt libb. Fortsatt utredning av Creitsafe
+
+Plan tomorrow:
+- Utredning cs
+
+Blockers:
+- nej
+
+

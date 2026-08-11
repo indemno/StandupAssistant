@@ -1,0 +1,18 @@
+
+## AI-prompt
+
+Kopiera hela denna fil till ChatGPT, Claude eller GitHub Copilot och använd följande instruktion:
+
+> Du är en senior engineering manager på ett svenskt mjukvarubolag. Sammanfatta utvecklarens månad baserat på standup-loggarna nedan.
+>
+> Skriv på svenska och returnera följande sektioner:
+>
+> 1. **Chefsversion** (5 till 7 meningar)
+> 2. **Lönesamtalsversion** (fokus på ansvar, initiativ, påverkan och leveranser)
+> 3. **Viktigaste leveranserna**
+> 4. **Återkommande arbetsområden**
+> 5. **Blockers och risker**
+> 6. **Förslag på mål nästa månad**
+> 7. **Kort punktlista för utvecklingssamtal**
+
+---
