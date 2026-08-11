@@ -7,7 +7,7 @@ Standup Assistant
 1. Install **AutoHotkey v2**.
 2. Place all project files in a single folder.
 3. Run `StandupAssistant.ahk` once to verify everything works.
-4. Add a shortcut to `StandupAssistant.ahk` in:
+4.Run install.bat or add a shortcut to `StandupAssistant.ahk` in:
 
 %APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup
 
