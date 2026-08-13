@@ -79,7 +79,6 @@ Write-Host 'list        List available months and choose one'
 Write-Host 'summary     Generate a monthly summary file'
 Write-Host 'set time    Configure standup and daily reflection times'
 Write-Host 'help        Show this help screen'
-Write-Host 'exit        Close the application'
 Write-Host
 
 
@@ -170,8 +169,60 @@ else {
     }
 }
 
+}
+
+function Show-Week {
+Show-Header
+
+
+Write-Host "Last 5 workdays" -ForegroundColor Green
+Write-Host
+
+$entries = @()
+$date = Get-Date
+
+while ($entries.Count -lt 5) {
+
+    # Skip weekends
+    if ($date.DayOfWeek -ne [System.DayOfWeek]::Saturday -and
+        $date.DayOfWeek -ne [System.DayOfWeek]::Sunday) {
+
+        $entry = Get-DayBlock $date
+
+        if ($entry) {
+            $entries += [PSCustomObject]@{
+                Date = $date
+                Text = $entry.Text
+            }
+        }
+    }
+
+    $date = $date.AddDays(-1)
+
+    # Safety stop after searching one year
+    if (((Get-Date) - $date).Days -gt 365) {
+        break
+    }
+}
+
+if ($entries.Count -eq 0) {
+    Write-Host "No entries found." -ForegroundColor DarkGray
+    return
+}
+
+foreach ($entry in $entries | Sort-Object Date -Descending) {
+    Write-Host $entry.Text
+    Write-Host
+    Write-Host "----------------------------------------" -ForegroundColor DarkGray
+    Write-Host
+}
+Read-Host "Press Enter to return"
 
 }
+
+
+
+
 
 function Get-TodayBlock {
 return Get-DayBlock (Get-Date)
@@ -386,10 +437,9 @@ Read-Host 'Press Enter to return'
 function Set-Times {
 Show-Header
 
-
 $cfg = Get-Config
 
-Write-Host 'Configure reminder times' -ForegroundColor Green
+Write-Host 'Configure reminder settings' -ForegroundColor Green
 Write-Host
 
 $standup = Read-Host ('Time for standup [{0}]' -f $cfg.morningTime)
@@ -403,15 +453,12 @@ if ([string]::IsNullOrWhiteSpace($reflection)) {
 }
 
 function Normalize-Time([string]$t) {
-
     $t = $t.Trim()
 
-    # Allow 0850
     if ($t -match '^(\d{2})(\d{2})$') {
         return ($Matches[1] + ':' + $Matches[2])
     }
 
-    # Allow 8:50, 08:50, 8.50, 08.50
     if ($t -match '^(\d{1,2})[:.](\d{2})$') {
         $h = [int]$Matches[1]
         $m = [int]$Matches[2]
@@ -426,31 +473,44 @@ function Normalize-Time([string]$t) {
 
 $standup = Normalize-Time $standup
 if (-not $standup) {
-    Write-Host 'Invalid standup time. Use for example 08:50 or 0850.' -ForegroundColor Red
+    Write-Host 'Invalid standup time.' -ForegroundColor Red
     Start-Sleep -Seconds 2
     return
 }
 
 $reflection = Normalize-Time $reflection
 if (-not $reflection) {
-    Write-Host 'Invalid daily reflection time. Use for example 16:00 or 1600.' -ForegroundColor Red
+    Write-Host 'Invalid daily reflection time.' -ForegroundColor Red
     Start-Sleep -Seconds 2
     return
 }
 
+$defaultStartup = if ($cfg.showCliOnStartup) { 'Y' } else { 'N' }
+$startupAnswer = Read-Host ('Show interactive CLI automatically when Windows starts? (Y/N) [{0}]' -f $defaultStartup)
+
+if ([string]::IsNullOrWhiteSpace($startupAnswer)) {
+    $showCli = $cfg.showCliOnStartup
+}
+else {
+    $showCli = $startupAnswer.Trim().ToUpper().StartsWith('Y')
+}
+
 $cfg.morningTime = $standup
 $cfg.dailyTime = $reflection
+$cfg.showCliOnStartup = $showCli
+
 Save-Config $cfg
 
 Write-Host
 Write-Host ('Standup:          {0}' -f $standup) -ForegroundColor Green
 Write-Host ('Daily reflection: {0}' -f $reflection) -ForegroundColor Green
+Write-Host ('Show CLI on startup: {0}' -f $showCli) -ForegroundColor Green
 Write-Host
-Write-Host 'Times updated successfully.' -ForegroundColor Green
+Write-Host 'Settings updated successfully.' -ForegroundColor Green
 Start-Sleep -Seconds 2
 
-
 }
+
 
 
 # ======================================================
@@ -505,25 +565,32 @@ while ($true) {
 
 Show-Today
 
-Write-Host 'Commands:' -ForegroundColor Yellow
-Write-Host '  edit        Edit today''s reflection'
-Write-Host '  list        Browse previous months'
-Write-Host '  summary     Generate monthly summary'
-Write-Host '  set time    Configure reminder times'
-Write-Host '  help        Show detailed help'
-Write-Host '  exit        Close the application'
 Write-Host
+Write-Host "Commands:" -ForegroundColor Yellow
+
+Write-Host "  help        Show detailed help"
+Write-Host "  summary     Generate monthly summary"
+Write-Host "  list        Browse previous months"
+Write-Host "  edit        Edit today's reflection"
+Write-Host "  week        Show the last 5 entries"
+Write-Host "  set time    Configure reminder settings"
+Write-Host
+Write-Host "Press Enter to close, or type a command." -ForegroundColor DarkGray
 
 $input = Read-Host '>'
 
 if ([string]::IsNullOrWhiteSpace($input)) {
-    continue
+    Stop-Process -Id $PID
 }
 
 switch ($input.ToLower()) {
 
     'edit' {
         Edit-Today
+    }
+
+    'week' {
+        Show-Week
     }
 
     'list' {

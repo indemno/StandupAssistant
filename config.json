@@ -1,4 +1,5 @@
 ﻿{
-    "dailyTime":  "15:30",
-    "morningTime":  "08:50"
+    "dailyTime":  "16:00",
+    "morningTime":  "08:55",
+    "showCliOnStartup":  true
 }

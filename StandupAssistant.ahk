@@ -1,6 +1,10 @@
 ﻿#Requires AutoHotkey v2.0
 #SingleInstance Force
 
+; ============================================
+; Standup Assistant Scheduler
+; ============================================
+
 baseDir := A_ScriptDir
 psScript := baseDir "\StandupAssistant.ps1"
 configFile := baseDir "\config.json"
@@ -8,18 +12,52 @@ configFile := baseDir "\config.json"
 lastTrigger := ""
 
 if !FileExist(psScript) {
-MsgBox("StandupAssistant.ps1 was not found in:`n" psScript)
+MsgBox("StandupAssistant.ps1 was not found in:`n" psScript, "Standup Assistant", "Iconx")
 ExitApp
 }
 
-TrayTip("Standup Assistant", "Scheduler is running.", 3)
+; --------------------------------------------------
+; Read startup preference from config
+; --------------------------------------------------
+showCliOnStartup := false
 
-; Start interactive CLI only if launched manually
-if (A_Args.Length = 0) {
+if FileExist(configFile) {
+json := FileRead(configFile, "UTF-8")
+
+
+if RegExMatch(json, '"showCliOnStartup"\s*:\s*(true|false)', &s)
+    showCliOnStartup := (s[1] = "true")
+
+
+}
+
+; --------------------------------------------------
+; Helper: launch the interactive PowerShell CLI
+; --------------------------------------------------
+LaunchCli() {
+global psScript
 Run("powershell.exe -NoExit -ExecutionPolicy Bypass -File `"" psScript "`"")
 }
 
-; Always run the scheduler
+; --------------------------------------------------
+; Manual launch: always open the CLI
+; --------------------------------------------------
+if (A_Args.Length = 0) {
+LaunchCli()
+}
+
+; --------------------------------------------------
+; Startup/background mode
+; --------------------------------------------------
+if (A_Args.Length > 0 && A_Args[1] = "background") {
+if (showCliOnStartup) {
+LaunchCli()
+}
+}
+
+; --------------------------------------------------
+; Start scheduler
+; --------------------------------------------------
 SetTimer(CheckTime, 60000)
 CheckTime()
 
@@ -42,12 +80,14 @@ if FileExist(configFile) {
 
 current := FormatTime(, "HH:mm")
 
+; Daily reflection
 if (current = reflectionTime) {
     if (lastTrigger != current) {
         lastTrigger := current
         Run("powershell.exe -ExecutionPolicy Bypass -File `"" psScript "`" daily")
     }
 }
+; Morning standup
 else if (current = standupTime) {
     if (lastTrigger != current) {
         lastTrigger := current
