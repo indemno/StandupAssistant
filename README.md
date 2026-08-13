@@ -1,58 +1,60 @@
-# StandupAssistant
-Standup Assistant
+# Standup Assistant
 
+A lightweight local standup and work journal for developers and knowledge workers.
+
+Standup Assistant makes daily standups and end-of-day reflections almost frictionless while automatically building a searchable history of your work. Over time, it becomes a monthly activity log that can be summarized with AI and used during 1:1s, performance reviews, sprint retrospectives, or monthly reporting.
+
+Everything runs **locally on your machine**. No cloud services, accounts, or external data storage.
 
 ## Installation
 
-1. Install **AutoHotkey v2**.
-2. Place all project files in a single folder.
-3. Run `StandupAssistant.ahk` once to verify everything works.
-4.Run install.bat or add a shortcut to `StandupAssistant.ahk` in:
+1. Download or clone the repository.
+2. Extract all files into a single folder.
+3. Run **install.bat**.
 
-%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup
+The installer will:
 
-After that, the scheduler starts automatically whenever you log in.
-
-
-
-# Standup Assistant
-
-A lightweight terminal-based work journal for developers and knowledge workers.
-
-The goal of Standup Assistant is to make daily standups and end-of-day reflections effortless while automatically building a searchable history of your work. Over time, it becomes a monthly activity log that can be summarized with AI and forwarded to a manager during 1:1s, monthly reviews, or performance discussions.
+* Install **AutoHotkey v2** (included in the package) if necessary
+* Create a Windows Startup shortcut
+* Start Standup Assistant in the background
 
 ## Purpose
 
-Standup Assistant supports three simple workflows:
+Standup Assistant is built around three simple workflows:
 
-* **Morning standup**: Quickly review what you did yesterday, what you planned, and any blockers before your standup meeting.
-* **Daily reflection**: At the end of the workday, answer three short questions about your progress.
-* **Monthly summary**: Generate a structured summary file that can be sent to ChatGPT, Claude, GitHub Copilot, or another AI assistant for a concise manager-ready report.
+* **Morning standup**: Review yesterday and today before your standup meeting.
+* **Daily reflection**: Capture what you accomplished, what comes next, and any blockers.
+* **Monthly summary**: Generate an AI-friendly summary file that can be turned into a concise manager-ready report.
 
-The tool is intentionally minimal and runs entirely locally.
+The philosophy is simple: spend less than a minute writing each day and let the history become useful documentation automatically.
 
 ## Features
 
-* Terminal-based interface (PowerShell)
-* Automatic daily log files grouped by month
-* Editable entries with prefilled values
+* Local PowerShell terminal interface
+* Automatic monthly log files
+* Editable daily entries with prefilled values
+* View **today and yesterday** at startup
+* View the **last five workdays**
 * Browse historical months
 * Configurable reminder times
+* Optional CLI launch on Windows startup
 * AI-friendly monthly summary generation
-* Automatic startup via AutoHotkey scheduler
+* Background scheduler using AutoHotkey
 
-## Project structure
+## Project Structure
 
 StandupAssistant/
 ├── StandupAssistant.ps1        # Main application
-├── StandupAssistant.ahk        # Scheduler (AutoHotkey)
-├── GenerateMonthlySummary.ps1  # Builds monthly summary file
+├── StandupAssistant.ahk        # Background scheduler
+├── GenerateMonthlySummary.ps1  # Builds monthly summary files
 ├── config.json                 # Reminder configuration
-├── Logs/                       # Monthly standup logs
+├── Logs/                       # Monthly work logs
 ├── Summaries/                  # Generated summary files
+├── install.bat                 # Installer
+├── uninstall.bat               # Removes startup integration
 └── README.md
 
-## How it works
+## How It Works
 
 ### Morning
 
@@ -60,15 +62,20 @@ At the configured **standup time**, AutoHotkey launches:
 
 StandupAssistant.ps1 today
 
-The application displays today's most recent entry and exits after confirmation.
+The application displays:
 
-### End of day
+* Yesterday's entry
+* Today's entry
+
+and then closes after confirmation.
+
+### End of Day
 
 At the configured **daily reflection time**, AutoHotkey launches:
 
 StandupAssistant.ps1 daily
 
-The application goes directly into the three reflection questions:
+You are prompted with three questions:
 
 * What did you do today?
 * Plan for tomorrow?
@@ -76,7 +83,7 @@ The application goes directly into the three reflection questions:
 
 Existing values are prefilled, so pressing **Enter** keeps the current value. After saving, the window closes automatically.
 
-### Manual use
+### Manual Use
 
 Running `StandupAssistant.ps1` directly opens the interactive interface.
 
@@ -86,29 +93,25 @@ Example:
 Standup Assistant
 =================
 
-2026-08-11
+Yesterday (2026-08-12)
+...
 
-What I did:
+---
 
-* Finished Bolagsverket integration
-
-Plan tomorrow:
-
-* Continue investigation
-
-Blockers:
-
-* Mail environment still broken
+Today (2026-08-13)
+...
 
 ---
 
 Commands:
 edit        Edit today's reflection
+week        Show the last five workdays
 list        Browse previous months
-summary     Generate monthly summary
-set time    Configure reminder times
+summary     Generate a monthly summary
+set time    Configure reminder settings
 help        Show detailed help
-exit        Close the application
+
+Press Enter to close, or type a command.
 
 ## Commands
 
@@ -116,81 +119,91 @@ exit        Close the application
 
 Edit today's reflection. Existing values are prefilled.
 
+### week
+
+Displays the **five most recent workday entries**, automatically skipping weekends.
+
 ### list
 
-Lists available months and lets you choose one by number or `YYYY-MM`.
+Browse available months and open any previous month by number or `YYYY-MM`.
 
 ### summary
 
-Runs `GenerateMonthlySummary.ps1` and creates a summary file for the current month.
+Generates a monthly summary file using `GenerateMonthlySummary.ps1`.
 
 ### set time
 
-Configure both reminder times interactively:
+Configure:
 
-* **Time for standup**
-* **Time for daily reflection**
+* Standup reminder time
+* Daily reflection reminder time
+* Whether the interactive CLI should open automatically when Windows starts
 
-Values are stored in `config.json`.
+Settings are stored in `config.json`.
 
 ### help
 
-Displays detailed documentation and usage information.
-
-### exit
-
-Closes the application.
+Displays detailed usage information.
 
 ## Configuration
 
-Reminder times are stored in `config.json`.
+Reminder and startup settings are stored in `config.json`.
 
 Example:
 
 {
 "dailyTime": "16:00",
-"morningTime": "08:55"
+"morningTime": "08:55",
+"showCliOnStartup": false
 }
 
 The AutoHotkey scheduler reads this file automatically.
 
-## Monthly summaries
+## Monthly Summaries
 
 Running `summary` generates a file in the `Summaries` folder.
 
-The generated file contains:
+The file contains:
 
 * Metadata
 * Number of logged workdays
 * An AI prompt
-* All standup entries for the selected month
+* All entries for the selected month
 
-The file can be pasted directly into ChatGPT, Claude, GitHub Copilot, or another AI assistant to produce a manager-ready monthly report.
+It can be pasted directly into ChatGPT, Claude, GitHub Copilot, or another AI assistant to generate a structured monthly report.
 
-## Typical workflow
+## Typical Workflow
 
-Morning:
+**Morning**
 
-* Read today's log before standup
+* Review yesterday and today before standup
 
-Afternoon:
+**Afternoon**
 
 * Complete the daily reflection
 
-End of month:
+**End of month**
 
 * Generate a summary
-* Send it to an AI assistant
-* Forward the result to your manager
+* Paste it into an AI assistant
+* Send the resulting report to your manager
+
+## Privacy
+
+Standup Assistant stores everything **locally** on your computer.
+
+No data is uploaded, synchronized, or shared automatically, making it suitable for internal company work where privacy and ownership of notes are important.
 
 ## Philosophy
 
-This project is intentionally simple.
+Standup Assistant is intentionally minimal.
 
-It is not a task manager, ticket tracker, or project management system.
+It is **not** a task manager, issue tracker, or project management system.
 
-It is a **low-friction work journal** designed to capture what you actually accomplished each day and turn that history into useful documentation with minimal effort.
+It is a **low-friction work journal** designed to capture what you actually accomplished each day and turn that history into useful documentation with almost no maintenance.
 
-Author
-Created by Christofer Malmberg.
-This started as a personal developer productivity tool and evolved into a lightweight local standup and reflection assistant. Feel free to modify, extend, and share it internally.
+## Author
+
+Created by **Christofer Malmberg**.
+
+Originally built as a personal developer productivity tool and gradually evolved into a lightweight local standup and reflection assistant. Feel free to modify, extend, and share it internally.
