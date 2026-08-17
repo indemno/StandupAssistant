@@ -232,41 +232,48 @@ return Get-DayBlock (Get-Date)
 
 
 function Show-Today {
-Show-Header
+    Show-Header
 
+    $today = Get-Date
 
-$yesterday = Get-DayBlock ((Get-Date).AddDays(-1))
-$today = Get-DayBlock (Get-Date)
+    # Find previous working day
+    $previousWorkday = $today.AddDays(-1)
 
-Write-Host ('Yesterday ({0})' -f (Get-Date).AddDays(-1).ToString('yyyy-MM-dd')) -ForegroundColor Yellow
-Write-Host
+    while ($previousWorkday.DayOfWeek -eq [DayOfWeek]::Saturday -or
+           $previousWorkday.DayOfWeek -eq [DayOfWeek]::Sunday) {
+        $previousWorkday = $previousWorkday.AddDays(-1)
+    }
 
-if ($yesterday) {
-    Write-Host $yesterday.Text
-}
-else {
-    Write-Host 'No entry for yesterday.' -ForegroundColor DarkGray
-}
+    $yesterday = Get-DayBlock $previousWorkday
+    $todayBlock = Get-DayBlock $today
 
-Write-Host
-Write-Host '----------------------------------------' -ForegroundColor DarkGray
-Write-Host
+    Write-Host ('Previous workday ({0})' -f $previousWorkday.ToString('yyyy-MM-dd')) -ForegroundColor Yellow
+    Write-Host
 
-Write-Host ('Today ({0})' -f (Get-Date).ToString('yyyy-MM-dd')) -ForegroundColor Green
-Write-Host
+    if ($yesterday) {
+        Write-Host $yesterday.Text
+    }
+    else {
+        Write-Host 'No entry for previous workday.' -ForegroundColor DarkGray
+    }
 
-if ($today) {
-    Write-Host $today.Text
-}
-else {
-    Write-Host 'No entry for today yet.' -ForegroundColor DarkGray
-}
+    Write-Host
+    Write-Host '----------------------------------------' -ForegroundColor DarkGray
+    Write-Host
 
-Write-Host
-Write-Host '----------------------------------------' -ForegroundColor DarkGray
-Write-Host
+    Write-Host ('Today ({0})' -f $today.ToString('yyyy-MM-dd')) -ForegroundColor Green
+    Write-Host
 
+    if ($todayBlock) {
+        Write-Host $todayBlock.Text
+    }
+    else {
+        Write-Host 'No entry for today yet.' -ForegroundColor DarkGray
+    }
 
+    Write-Host
+    Write-Host '----------------------------------------' -ForegroundColor DarkGray
+    Write-Host
 }
 
 
