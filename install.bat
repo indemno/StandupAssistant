@@ -21,20 +21,20 @@ start "" "https://www.autohotkey.com/"
 
 echo Creating startup shortcut...
 
-powershell -NoProfile -Command ^
-"$shell = New-Object -ComObject WScript.Shell; ^
-$shortcut = $shell.CreateShortcut([Environment]::ExpandEnvironmentVariables('%STARTUP%')); ^
-$shortcut.TargetPath = [IO.Path]::GetFullPath('%SCRIPT%'); ^
-$shortcut.Arguments = 'background'; ^
-$shortcut.Save()"
+powershell -NoProfile -ExecutionPolicy Bypass -Command ^
+"$WshShell = New-Object -ComObject WScript.Shell; ^
+$Shortcut = $WshShell.CreateShortcut('%STARTUP%'); ^
+$Shortcut.TargetPath = '%SCRIPT%'; ^
+$Shortcut.Arguments = 'background'; ^
+$Shortcut.Save()"
 
 echo Creating desktop shortcut...
 
-powershell -NoProfile -Command ^
+powershell -NoProfile -ExecutionPolicy Bypass -Command ^
 "$desktop = [Environment]::GetFolderPath('Desktop'); ^
 $shell = New-Object -ComObject WScript.Shell; ^
 $shortcut = $shell.CreateShortcut((Join-Path $desktop 'Standup Assistant.lnk')); ^
-$shortcut.TargetPath = [IO.Path]::GetFullPath('%SCRIPT%'); ^
+$shortcut.TargetPath = '%SCRIPT%'; ^
 $shortcut.Save()"
 
 echo.
@@ -42,9 +42,9 @@ echo ============================================
 echo Installation completed.
 echo ============================================
 echo.
-echo Starting Standup Assistant...
-
-start "" "%SCRIPT%" background
-
+echo Standup Assistant shortcut created on the desktop.
+echo Standup Assistant will start automatically with Windows.
+echo.
+echo Please install AutoHotkey v2 if it is not already installed.
 echo.
 pause
