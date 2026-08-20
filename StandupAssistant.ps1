@@ -35,6 +35,7 @@ if (-not (Test-Path $ConfigFile)) {
     @{
         dailyTime   = '16:00'
         morningTime = '08:55'
+        showCliOnStartup = $false
     } | ConvertTo-Json | Set-Content $ConfigFile -Encoding UTF8
 }
 
