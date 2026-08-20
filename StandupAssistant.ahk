@@ -12,91 +12,107 @@ configFile := baseDir "\config.json"
 lastTrigger := ""
 
 if !FileExist(psScript) {
-MsgBox("StandupAssistant.ps1 was not found in:`n" psScript, "Standup Assistant", "Iconx")
-ExitApp
+    MsgBox(
+        "StandupAssistant.ps1 was not found in:`n" psScript,
+        "Standup Assistant",
+        "Iconx"
+    )
+    ExitApp
 }
 
 ; --------------------------------------------------
 ; Read startup preference from config
 ; --------------------------------------------------
+
 showCliOnStartup := false
 
 if FileExist(configFile) {
-json := FileRead(configFile, "UTF-8")
+    json := FileRead(configFile, "UTF-8")
 
-
-if RegExMatch(json, '"showCliOnStartup"\s*:\s*(true|false)', &s)
-    showCliOnStartup := (s[1] = "true")
-
-
+    if RegExMatch(json, '"showCliOnStartup"\s*:\s*(true|false)', &s)
+        showCliOnStartup := (s[1] = "true")
 }
 
 ; --------------------------------------------------
 ; Helper: launch the interactive PowerShell CLI
 ; --------------------------------------------------
+
 LaunchCli() {
-global psScript
-Run("powershell.exe -NoExit -ExecutionPolicy Bypass -File `"" psScript "`"")
+    global psScript
+    Run("powershell.exe -NoExit -ExecutionPolicy Bypass -File `"" psScript "`"")
 }
 
 ; --------------------------------------------------
-; Manual launch: always open the CLI
+; Manual launch
+; Open command mode only.
+; Scheduler stays running, but does NOT immediately
+; check the timer.
 ; --------------------------------------------------
+
 if (A_Args.Length = 0) {
-LaunchCli()
+    LaunchCli()
 }
 
 ; --------------------------------------------------
 ; Startup/background mode
 ; --------------------------------------------------
-if (A_Args.Length > 0 && A_Args[1] = "background") {
-if (showCliOnStartup) {
-LaunchCli()
-}
+
+else if (A_Args[1] = "background") {
+    if (showCliOnStartup) {
+        LaunchCli()
+    }
+
+    ; Check immediately when started automatically
+    SetTimer(CheckTime, 60000)
+    CheckTime()
 }
 
 ; --------------------------------------------------
-; Start scheduler
+; Start scheduler for manual launch
 ; --------------------------------------------------
-SetTimer(CheckTime, 60000)
-CheckTime()
+
+if (A_Args.Length = 0) {
+    SetTimer(CheckTime, 60000)
+}
+else if (A_Args[1] != "background") {
+    SetTimer(CheckTime, 60000)
+}
 
 CheckTime() {
-global lastTrigger, psScript, configFile
+    global lastTrigger, psScript, configFile
 
+    standupTime := "08:55"
+    reflectionTime := "16:00"
 
-standupTime := "08:55"
-reflectionTime := "16:00"
+    if FileExist(configFile) {
+        json := FileRead(configFile, "UTF-8")
 
-if FileExist(configFile) {
-    json := FileRead(configFile, "UTF-8")
+        if RegExMatch(json, '"morningTime"\s*:\s*"([^"]+)"', &m)
+            standupTime := m[1]
 
-    if RegExMatch(json, '"morningTime"\s*:\s*"([^"]+)"', &m)
-        standupTime := m[1]
-
-    if RegExMatch(json, '"dailyTime"\s*:\s*"([^"]+)"', &r)
-        reflectionTime := r[1]
-}
-
-current := FormatTime(, "HH:mm")
-
-; Daily reflection
-if (current = reflectionTime) {
-    if (lastTrigger != current) {
-        lastTrigger := current
-        Run("powershell.exe -ExecutionPolicy Bypass -File `"" psScript "`" daily")
+        if RegExMatch(json, '"dailyTime"\s*:\s*"([^"]+)"', &r)
+            reflectionTime := r[1]
     }
-}
-; Morning standup
-else if (current = standupTime) {
-    if (lastTrigger != current) {
-        lastTrigger := current
-        Run("powershell.exe -ExecutionPolicy Bypass -File `"" psScript "`" today")
+
+    current := FormatTime(, "HH:mm")
+
+    ; Daily reflection
+    if (current = reflectionTime) {
+        if (lastTrigger != current) {
+            lastTrigger := current
+            Run("powershell.exe -ExecutionPolicy Bypass -File `"" psScript "`" daily")
+        }
     }
-}
-else {
-    lastTrigger := ""
-}
 
+    ; Morning standup
+    else if (current = standupTime) {
+        if (lastTrigger != current) {
+            lastTrigger := current
+            Run("powershell.exe -ExecutionPolicy Bypass -File `"" psScript "`" today")
+        }
+    }
 
+    else {
+        lastTrigger := ""
+    }
 }
