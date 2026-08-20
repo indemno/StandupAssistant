@@ -39,3 +39,11 @@ json
   "morningTime": "08:55",
   "showCliOnStartup": false
 }
+
+## Credits
+
+Created and maintained by **Christofer Malmberg**.
+
+Standup Assistant was originally built as a personal developer productivity tool and evolved into a lightweight local standup and work journal.
+
+The project is designed to be simple, local, and easy to adapt for internal use.
