@@ -33,7 +33,7 @@ On first launch, Standup Assistant automatically creates a `config.json` file if
 
 The default configuration is:
 
-```json
+json
 {
   "dailyTime": "16:00",
   "morningTime": "08:55",
