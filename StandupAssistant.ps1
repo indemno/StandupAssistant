@@ -387,114 +387,36 @@ function Read-EditableInput {
         [string]$DefaultValue = ''
     )
 
-    Write-Host $Prompt -ForegroundColor Cyan
-    Write-Host -NoNewline '> '
+    $result = Read-Host $Prompt
 
-    $text = $DefaultValue
-    $cursor = $text.Length
-
-    Write-Host -NoNewline $text
-
-    while ($true) {
-        $key = [Console]::ReadKey($true)
-
-        switch ($key.Key) {
-
-            'Enter' {
-                Write-Host
-                return $text
-            }
-
-            'Backspace' {
-                if ($cursor -gt 0) {
-                    $text = $text.Remove($cursor - 1, 1)
-                    $cursor--
-
-                    [Console]::Write("`b `b")
-
-                    if ($cursor -lt $text.Length) {
-                        $remaining = $text.Substring($cursor)
-                        [Console]::Write($remaining + ' ')
-                        [Console]::SetCursorPosition(
-                            [Console]::CursorLeft - $remaining.Length - 1,
-                            [Console]::CursorTop
-                        )
-                    }
-                }
-            }
-
-            'Delete' {
-                if ($cursor -lt $text.Length) {
-                    $text = $text.Remove($cursor, 1)
-
-                    $remaining = $text.Substring($cursor)
-                    [Console]::Write($remaining + ' ')
-                    [Console]::SetCursorPosition(
-                        [Console]::CursorLeft - $remaining.Length - 1,
-                        [Console]::CursorTop
-                    )
-                }
-            }
-
-            'LeftArrow' {
-                if ($cursor -gt 0) {
-                    $cursor--
-                    [Console]::SetCursorPosition(
-                        [Console]::CursorLeft - 1,
-                        [Console]::CursorTop
-                    )
-                }
-            }
-
-            'RightArrow' {
-                if ($cursor -lt $text.Length) {
-                    $cursor++
-                    [Console]::SetCursorPosition(
-                        [Console]::CursorLeft + 1,
-                        [Console]::CursorTop
-                    )
-                }
-            }
-
-            'Home' {
-                [Console]::SetCursorPosition(
-                    [Console]::CursorLeft - $cursor,
-                    [Console]::CursorTop
-                )
-                $cursor = 0
-            }
-
-            'End' {
-                [Console]::SetCursorPosition(
-                    [Console]::CursorLeft + ($text.Length - $cursor),
-                    [Console]::CursorTop
-                )
-                $cursor = $text.Length
-            }
-
-            default {
-                if ($key.KeyChar -ne [char]0) {
-                    $char = $key.KeyChar
-
-                    $text = $text.Insert($cursor, $char)
-                    $cursor++
-
-                    $remaining = $text.Substring($cursor - 1)
-                    [Console]::Write($remaining)
-
-                    [Console]::SetCursorPosition(
-                        [Console]::CursorLeft - $remaining.Length,
-                        [Console]::CursorTop
-                    )
-
-                    [Console]::SetCursorPosition(
-                        [Console]::CursorLeft + $remaining.Length,
-                        [Console]::CursorTop
-                    )
-                }
-            }
-        }
+    if ([string]::IsNullOrWhiteSpace($result)) {
+        return $DefaultValue
     }
+
+    return $result
+}
+
+# ============================================
+# Open log for manual editing
+# ============================================
+
+function Open-Log {
+    $logFile = Get-CurrentLogFile
+
+    if (-not (Test-Path $logFile)) {
+        New-Item -ItemType File -Path $logFile -Force | Out-Null
+    }
+
+    # Open the log in Notepad.
+    $process = Start-Process notepad.exe -ArgumentList "`"$logFile`"" -PassThru
+
+    # Wait for Notepad to create its main window.
+    $process.WaitForInputIdle() | Out-Null
+    Start-Sleep -Milliseconds 300
+
+    # Send Ctrl+End to move to the end of the document.
+    Add-Type -AssemblyName System.Windows.Forms
+    [System.Windows.Forms.SendKeys]::SendWait('^({END})')
 }
 
 # ============================================
@@ -523,10 +445,6 @@ function Edit-Today {
         $plan = Get-EntryValue $block.Text 'Plan tomorrow:'
         $blockers = Get-EntryValue $block.Text 'Blockers:'
     }
-
-    Write-Host 'Edit today' -ForegroundColor Green
-
-    Write-Host
 
     # Plan today
     if ($AllowPlanEdit) {
@@ -845,7 +763,7 @@ while ($true) {
     switch ($input.ToLower()) {
 
         'edit' {
-             Edit-Today $true
+            Open-Log
         }
 
         'week' {
