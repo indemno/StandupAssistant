@@ -316,7 +316,11 @@ Blockers:
 "@
 
     if (-not (Test-Path $logFile)) {
-        Set-Content -Path $logFile -Value $newEntry -Encoding UTF8
+        [System.IO.File]::WriteAllText(
+            $logFile,
+            $newEntry,
+            [System.Text.UTF8Encoding]::new($true)
+        )
     }
     elseif ($todayBlock) {
         $before = $todayBlock.FullContent.Substring(0, $todayBlock.Start)
@@ -324,10 +328,18 @@ Blockers:
 
         $updated = $before + $newEntry + $after
 
-        Set-Content -Path $logFile -Value $updated -Encoding UTF8
+        [System.IO.File]::WriteAllText(
+            $logFile,
+            $updated,
+            [System.Text.UTF8Encoding]::new($true)
+        )
     }
     else {
-        Add-Content -Path $logFile -Value ("`n" + $newEntry) -Encoding UTF8
+        [System.IO.File]::AppendAllText(
+            $logFile,
+            "`n" + $newEntry,
+            [System.Text.UTF8Encoding]::new($true)
+        )
     }
 
     Write-Host
@@ -410,7 +422,11 @@ function Open-Log {
     $logFile = Get-CurrentLogFile
 
     if (-not (Test-Path $logFile)) {
-        New-Item -ItemType File -Path $logFile -Force | Out-Null
+        [System.IO.File]::WriteAllText(
+            $logFile,
+            '',
+            [System.Text.UTF8Encoding]::new($true)
+        )
     }
 
     # Open the log in Notepad.
@@ -500,7 +516,11 @@ Blockers:
 "@
 
     if (-not (Test-Path $logFile)) {
-        Set-Content -Path $logFile -Value $newEntry -Encoding UTF8
+        [System.IO.File]::WriteAllText(
+            $logFile,
+            $newEntry,
+            [System.Text.UTF8Encoding]::new($true)
+        )
     }
     elseif ($block) {
         $before = $block.FullContent.Substring(0, $block.Start)
@@ -508,10 +528,18 @@ Blockers:
 
         $updated = $before + $newEntry + $after
 
-        Set-Content -Path $logFile -Value $updated -Encoding UTF8
+        [System.IO.File]::WriteAllText(
+            $logFile,
+            $updated,
+            [System.Text.UTF8Encoding]::new($true)
+        )
     }
     else {
-        Add-Content -Path $logFile -Value ("`n" + $newEntry) -Encoding UTF8
+        [System.IO.File]::AppendAllText(
+            $logFile,
+            "`n" + $newEntry,
+            [System.Text.UTF8Encoding]::new($true)
+        )
     }
 
     Write-Host
