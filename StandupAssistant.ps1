@@ -1,4 +1,4 @@
-param(
+﻿param(
     [string]$Command,
     [string]$Argument
 )
@@ -103,6 +103,12 @@ function Get-DayBlock {
     }
 
     $content = Get-Content $logFile -Raw
+
+    # A newly created monthly log file can be empty.
+    # In that case there is no day block to find yet.
+    if ([string]::IsNullOrEmpty($content)) {
+        return $null
+    }
 
     $dateIndex = $content.LastIndexOf($dateText)
 
